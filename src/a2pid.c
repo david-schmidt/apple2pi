@@ -17,7 +17,8 @@
 #include <linux/input.h>
 #include <linux/uinput.h>
 
-char deftty[] = "/dev/ttyAMA0"; /* Default for Raspberry Pi */
+//char deftty[] = "/dev/ttyAMA0"; /* Default for Raspberry Pi */
+char deftty[] = "/dev/serial0"; /* Default for Raspberry Pi */
 #if defined(SETSERCLK) && defined(__ARMEL__)
 #include "gpclk.c"
 #endif
@@ -598,10 +599,7 @@ void main(int argc, char **argv)
      * Initialize ACIA clock for Apple II Pi card
      */
     if (devtty == deftty)
-    {
         gpclk(271); /* divisor for ~1.8 MHz => (500/271) MHz */
-        sleep(1);   /* give clock chance to settle down */
-    }
 #endif
     /*
      * Open serial port.
@@ -849,7 +847,7 @@ reset:
                             {
                                 iopkt[0] = a2reqlist->type;
                                 write(a2fd, iopkt, 1);
-				printf("vdrive: status resend request %04X\n", a2reqlist->type);
+				//printf("vdrive: status resend request %04X\n", a2reqlist->type);
                             }
                             break;
                         case 0xA4: /* virtual drive 1 READ call */
@@ -863,7 +861,7 @@ reset:
                             {
                                 iopkt[0] = a2reqlist->type;
                                 write(a2fd, iopkt, 1);
-				printf("vdrive: read resend request %04X\n", a2reqlist->type);
+				//printf("vdrive: read resend request %04X\n", a2reqlist->type);
                             }
                             break;
                         case 0xA8: /* virtual drive 1 WRITE call */
@@ -881,7 +879,7 @@ reset:
                             {
                                 iopkt[0] = a2reqlist->type;
                                 write(a2fd, iopkt, 1);
-				printf("vdrive: write resend request %04X\n", a2reqlist->type);
+				//printf("vdrive: write resend request %04X\n", a2reqlist->type);
                             }
                             break;
                         case 0xAC: /* virtual clock TIME call */
@@ -893,7 +891,7 @@ reset:
                             {
                                 iopkt[0] = a2reqlist->type;
                                 write(a2fd, iopkt, 1);
-				printf("vclock: resend request %04X\n", a2reqlist->type);
+				//printf("vclock: resend request %04X\n", a2reqlist->type);
                             }
                             break;
                         default:

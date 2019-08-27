@@ -41,8 +41,8 @@ volatile unsigned int *setup_io(int reg_base)
     // open /dev/mem
     if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0)
     {
-	printf("can't open /dev/mem \n");
-	exit(-1);
+        printf("can't open /dev/mem \n");
+        exit(-1);
     }
     // mmap IO
     io_map = mmap(NULL,             //Any adddress in our space will do
@@ -54,8 +54,8 @@ volatile unsigned int *setup_io(int reg_base)
     close(mem_fd); //No need to keep mem_fd open after mmap
     if (io_map == MAP_FAILED)
     {
-	printf("mmap error %d\n", (int)io_map);//errno also set!
-	exit(-1);
+        printf("mmap error %d\n", (int)io_map);//errno also set!
+        exit(-1);
     }
     return (volatile unsigned *)io_map;
 }
@@ -73,24 +73,32 @@ void gpclk(int idiv)
     unsigned int arm_base = ARMv6_PERI_BASE; // Default to ARMv6 peripheral base
 
     FILE *cpuinfo;
-    char keystr[256], valstr[128];
+    char rasstr[1024], pistr[128];
+    int version;
 
-    if ((cpuinfo = fopen("/proc/cpuinfo", "r") ) == NULL)
+    if ((cpuinfo = fopen("/proc/device-tree/model", "r") ) == NULL)
     {
-	printf("can't open /proc/cpuinfo\n");
-	exit(-1);
+        printf("can't open /proc/device-tree/model\n");
+        exit(-1);
     }
-    while (!feof(cpuinfo))
+    if (fscanf(cpuinfo, "%s %s %d", rasstr, pistr, &version) == 3)
     {
-        if (fscanf(cpuinfo, "%s : %s\n", keystr, valstr) == 2)
+        if (strcmp(rasstr, "Raspberry") == 0 && strcmp(pistr, "Pi") == 0)
         {
-            if (strcmp(keystr, "Hardware") == 0 && strcmp(valstr, "BCM2709") == 0)
+            //printf("Found %s %s version %d\n", rasstr, pistr, version);
+            switch (version)
             {
-                arm_base = ARMv7_PERI_BASE; // Pi version 2 (ARMv7)
-                break;
+                case 0:
+                case 1:
+                    arm_base = ARMv6_PERI_BASE; // Pi version 1 (ARMv6)
+                    break;
+                case 2:
+                case 3:
+                    arm_base = ARMv7_PERI_BASE; // Pi version 2 and 3 (ARMv7)
+                    break;
             }
         }
-    }       
+    }
     fclose(cpuinfo);
     // Set up gpi pointer for direct register access
     cmgp = setup_io(arm_base + CMGP_OFFSET);

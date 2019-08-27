@@ -1,0 +1,14 @@
+[Unit]
+Description=Apple II Pi Daemon
+After=network.target
+
+[Service]
+Type=idle
+Environment="HOME=/root"
+EnvironmentFile=-/etc/default/a2pi
+ExecStart=/sbin/a2pid $A2PID_OPTS
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
